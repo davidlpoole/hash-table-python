@@ -49,9 +49,14 @@ def test_should_not_grow_when_removing_elements():
     assert len(hash_table) == 100
 
 
-@pytest.mark.skip
-def test_should_not_shrink_when_removing_elements():
-    pass
+def test_should_not_shrink_when_removing_elements(hash_table):
+    original_length = len(hash_table)
+    # assert "hola" in hash_table
+    assert "hello" in hash_table.values
+    del hash_table["hola"]
+    assert len(hash_table) == original_length
+    # assert "hola" not in hash_table
+    assert "hello" not in hash_table.values
 
 
 def test_should_not_contain_none_value_when_created():
