@@ -1,5 +1,14 @@
-from hashtable import HashTable
+from hashtable import HashTable, BLANK
 import pytest
+
+
+@pytest.fixture
+def hash_table():
+    sample_data = HashTable(capacity=100)
+    sample_data["hola"] = "hello"
+    sample_data[98.6] = 37
+    sample_data[False] = True
+    return sample_data
 
 
 def test_should_create_hashtable():
@@ -12,7 +21,7 @@ def test_should_report_capacity():
 
 def test_should_create_empty_value_slots():
     # Given
-    expected_values = [None, None, None]
+    expected_values = [BLANK, BLANK, BLANK]
     hash_table = HashTable(capacity=3)
 
     # When
@@ -43,3 +52,19 @@ def test_should_not_grow_when_removing_elements():
 @pytest.mark.skip
 def test_should_not_shrink_when_removing_elements():
     pass
+
+
+def test_should_not_contain_none_value_when_created():
+    assert None not in HashTable(capacity=100).values
+
+
+def test_should_insert_none_value():
+    hash_table = HashTable(capacity=100)
+    hash_table["key"] = None
+    assert None in hash_table.values
+
+
+def test_should_find_value_by_key(hash_table):
+    assert hash_table["hola"] == "hello"
+    assert hash_table[98.6] == 37
+    assert hash_table[False] is True
