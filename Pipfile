@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 
 [dev-packages]
+pytest = "*"
+pytest-unordered = "*"
 
 [requires]
 python_version = "3.8"
