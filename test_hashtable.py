@@ -1,4 +1,4 @@
-from hashtable import HashTable, BLANK
+from hashtable import HashTable
 import pytest
 
 
@@ -19,28 +19,28 @@ def test_should_report_capacity():
     assert len(HashTable(capacity=100)) == 100
 
 
+def test_should_return_pairs(hash_table):
+    assert ("hola", "hello") in hash_table.pairs
+    assert (98.6, 37) in hash_table.pairs
+    assert (False, True) in hash_table.pairs
+
+
 def test_should_create_empty_value_slots():
     # Given
-    expected_values = [BLANK, BLANK, BLANK]
+    expected_values = [None, None, None]
     hash_table = HashTable(capacity=3)
 
     # When
-    actual_values = hash_table.values
+    actual_values = hash_table.pairs
 
     # Then
     assert actual_values == expected_values
 
 
-def test_should_insert_key_value_pairs():
-    hash_table = HashTable(capacity=100)
-
-    hash_table["hola"] = "hello"
-    hash_table[98.6] = 37
-    hash_table[False] = True
-
-    assert "hello" in hash_table.values
-    assert 37 in hash_table.values
-    assert True in hash_table.values
+def test_should_insert_key_value_pairs(hash_table):
+    assert ("hola", "hello") in hash_table.pairs
+    assert (98.6, 37) in hash_table.pairs
+    assert (False, True) in hash_table.pairs
 
 
 def test_should_update_value(hash_table):
@@ -54,32 +54,31 @@ def test_should_update_value(hash_table):
     assert len(hash_table) == 100
 
 
-def test_should_not_grow_when_removing_elements():
-    hash_table = HashTable(capacity=100)
+def test_should_not_grow_when_removing_elements(hash_table):
     hash_table["hola"] = "hello"
     assert len(hash_table) == 100
 
 
 def test_should_not_shrink_when_removing_elements(hash_table):
-    assert "hola" in hash_table
-    assert "hello" in hash_table.values
+    assert ("hola", "hello") in hash_table.pairs
     original_length = len(hash_table)
 
     del hash_table["hola"]
 
-    assert "hola" not in hash_table
-    assert "hello" not in hash_table.values
+    assert ("hola", "hello") not in hash_table.pairs
     assert len(hash_table) == original_length
 
 
 def test_should_not_contain_none_value_when_created():
-    assert None not in HashTable(capacity=100).values
-
+    hash_table = HashTable(capacity=100)
+    values = [pair.value for pair in hash_table.pairs if pair]
+    assert None not in values
+    
 
 def test_should_insert_none_value():
     hash_table = HashTable(capacity=100)
     hash_table["key"] = None
-    assert None in hash_table.values
+    assert None in hash_table.pairs
 
 
 def test_should_find_value_by_key(hash_table):
