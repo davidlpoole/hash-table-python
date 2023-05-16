@@ -7,6 +7,7 @@ class Pair(NamedTuple):
 
 
 class HashTable:
+
     def __init__(self, capacity: int):
         if type(capacity) != int or capacity < 1:
             raise ValueError("Capacity must be a positive integer")
@@ -15,6 +16,16 @@ class HashTable:
     def __len__(self):
         return len(self.pairs)
 
+    def __str__(self):
+        pairs = []
+        for key, value in self.pairs:
+            pairs.append(f"{key!r}: {value!r}")
+        return "{" + ", ".join(pairs) + "}"
+
+    def __repr__(self):
+        cls = self.__class__.__name__
+        return f"{cls}.from_dict({str(self)})"
+    
     def __delitem__(self, key):
         if key in self:
             self._slots[self._index(key)] = None
@@ -46,6 +57,13 @@ class HashTable:
             return self[key]
         except KeyError:
             return default
+
+    @classmethod
+    def from_dict(cls, dictionary, capacity=None):
+        hash_table = cls(capacity or len(dictionary) * 10)
+        for key, value in dictionary.items():
+            hash_table[key] = value
+        return hash_table
 
     @property
     def pairs(self):
