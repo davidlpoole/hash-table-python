@@ -38,6 +38,9 @@ class HashTable:
         else:
             return True
 
+    def __iter__(self):
+        yield from self.keys
+
     def get(self, key, default=None):
         try:
             return self[key]
