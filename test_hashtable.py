@@ -17,8 +17,12 @@ def test_should_create_hashtable():
     assert HashTable(capacity=100) is not None
 
 
-def test_should_report_capacity():
-    assert len(HashTable(capacity=100)) == 100
+def test_should_report_length_of_empty_hash_table():
+    assert len(HashTable(capacity=100)) == 0
+
+
+def test_should_report_length(hash_table):
+    assert len(hash_table) == 3
 
 
 def test_should_return_pairs(hash_table):
@@ -41,8 +45,8 @@ def test_should_not_include_blank_pairs(hash_table):
     assert None not in hash_table.pairs
 
 
-def test_should_create_empty_value_slots():
-    assert HashTable(capacity=3)._pairs == [None, None, None]
+def test_should_create_empty_pair_slots():
+    assert HashTable(capacity=3)._slots == [None, None, None]
 
 
 def test_should_insert_key_value_pairs(hash_table):
@@ -53,28 +57,33 @@ def test_should_insert_key_value_pairs(hash_table):
 
 def test_should_update_value(hash_table):
     assert hash_table["hola"] == "hello"
-
     hash_table["hola"] = "hallo"
-
     assert hash_table["hola"] == "hallo"
     assert hash_table[98.6] == 37
     assert hash_table[False] is True
-    assert len(hash_table) == 100
-
-
-def test_should_not_grow_when_removing_elements(hash_table):
-    hash_table["hola"] = "hello"
-    assert len(hash_table) == 100
+    assert len(hash_table) == 3
 
 
 def test_should_not_shrink_when_removing_elements(hash_table):
     assert ("hola", "hello") in hash_table.pairs
-    original_length = len(hash_table)
-
     del hash_table["hola"]
-
     assert ("hola", "hello") not in hash_table.pairs
-    assert len(hash_table) == original_length
+    assert len(hash_table) == 2
+
+
+def test_should_not_create_hashtable_with_zero_capacity():
+    with pytest.raises(ValueError):
+        HashTable(capacity=0)
+
+
+def test_should_only_allow_integer_capacity():
+    with pytest.raises(ValueError):
+        HashTable(capacity="100")
+
+
+def test_should_not_create_hashtable_with_negative_capacity():
+    with pytest.raises(ValueError):
+        HashTable(capacity=-100)
 
 
 def test_should_not_contain_none_value_when_created():
