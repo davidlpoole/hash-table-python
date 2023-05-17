@@ -25,7 +25,7 @@ class HashTable:
     def __repr__(self):
         cls = self.__class__.__name__
         return f"{cls}.from_dict({str(self)})"
-    
+
     def __delitem__(self, key):
         if key in self:
             self._slots[self._index(key)] = None
@@ -49,6 +49,13 @@ class HashTable:
         else:
             return True
 
+    def __eq__(self, other):
+        if self is other:
+            return True
+        if type(self) is not type(other):
+            return False
+        return set(self.pairs) == set(other.pairs)
+
     def __iter__(self):
         yield from self.keys
 
@@ -57,6 +64,9 @@ class HashTable:
             return self[key]
         except KeyError:
             return default
+
+    def copy(self):
+        return HashTable.from_dict(dict(self.pairs), self.capacity)
 
     @classmethod
     def from_dict(cls, dictionary, capacity=None):
