@@ -1,5 +1,6 @@
 import pytest
 from pytest_unordered import unordered
+from unittest.mock import patch
 
 from hashtable import HashTable
 
@@ -281,3 +282,19 @@ def test_should_compare_equal_different_capacity():
     h1 = HashTable.from_dict(data, capacity=50)
     h2 = HashTable.from_dict(data, capacity=100)
     assert h1 == h2
+
+
+def test_should_store_key_value_pair_in_next_slot():
+    with patch("builtins.hash", return_value=24):
+        values = {
+            "easy": "Requires little effort",
+            "difficult": "Needs much skill"
+        }
+        hash_table = HashTable.from_dict(values, capacity=100)
+
+    assert hash_table._slots[24].key == "easy"
+    assert hash_table._slots[24].value == "Requires little effort"
+    assert hash_table._slots[25].key == "difficult"
+    assert hash_table._slots[25].value == "Needs much skill"
+    assert hash_table.capacity == 100
+    assert len(hash_table) == 2
