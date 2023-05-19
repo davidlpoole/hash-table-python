@@ -327,3 +327,9 @@ def test_should_increase_capacity():
         (1, "one"),
         (2, "two"),
     }
+
+
+def test_should_return_correct_load_factor(hash_table):
+    assert hash_table.load_factor == 0.03
+    hash_table[4] = "test"
+    assert hash_table.load_factor == 0.04

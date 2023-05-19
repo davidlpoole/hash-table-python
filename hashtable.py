@@ -125,5 +125,10 @@ class HashTable:
     def capacity(self):
         return len(self._slots)
 
+    @property
+    def load_factor(self):
+        occupied_or_deleted = [slot for slot in self._slots if slot]
+        return len(occupied_or_deleted) / self.capacity
+
     def _index(self, key):
         return hash(key) % self.capacity
