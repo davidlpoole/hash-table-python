@@ -10,7 +10,7 @@ class Pair(NamedTuple):
 
 class HashTable:
 
-    def __init__(self, capacity: int):
+    def __init__(self, capacity: int = 8):
         if type(capacity) != int or capacity < 1:
             raise ValueError("Capacity must be a positive integer")
         self._slots = capacity * [None]
@@ -35,7 +35,8 @@ class HashTable:
                 self._slots[index] = Pair(key, value)
                 break
         else:
-            raise MemoryError("Not enough capacity")
+            self._resize_and_rehash()
+            self[key] = value
 
     def __getitem__(self, key):
         for _, pair in self._probe(key):
@@ -83,6 +84,12 @@ class HashTable:
             yield index, self._slots[index]
             index = (index + 1) % self.capacity
 
+    def _resize_and_rehash(self):
+        copy = HashTable(capacity=self.capacity * 2)
+        for key, value in self.pairs:
+            copy[key] = value
+        self._slots = copy._slots
+
     def get(self, key, default=None):
         try:
             return self[key]
@@ -94,7 +101,7 @@ class HashTable:
 
     @classmethod
     def from_dict(cls, dictionary, capacity=None):
-        hash_table = cls(capacity or len(dictionary) * 10)
+        hash_table = cls(capacity or len(dictionary))
         for key, value in dictionary.items():
             hash_table[key] = value
         return hash_table

@@ -82,6 +82,11 @@ def test_should_only_allow_integer_capacity():
         HashTable(capacity="100")
 
 
+def test_should_have_default_capacity():
+    hash_table = HashTable()
+    assert hash_table.capacity == 8
+
+
 def test_should_not_create_hashtable_with_negative_capacity():
     with pytest.raises(ValueError):
         HashTable(capacity=-100)
@@ -216,7 +221,7 @@ def test_should_create_hashtable_from_dict():
 
     hash_table = HashTable.from_dict(dictionary)
 
-    assert hash_table.capacity == len(dictionary) * 10
+    assert hash_table.capacity == len(dictionary)
     assert hash_table.keys == set(dictionary.keys())
     assert hash_table.pairs == set(dictionary.items())
     assert unordered(hash_table.values) == list(dictionary.values())
@@ -307,3 +312,18 @@ def test_should_change_to_DELETED():
         assert hash_table._slots[24].key == "test"
         del hash_table["test"]
         assert hash_table._slots[24] is DELETED
+
+
+def test_should_increase_capacity():
+    hash_table = HashTable(capacity=1)
+
+    hash_table[1] = "one"
+    assert hash_table.capacity == 1
+
+    hash_table[2] = "two"
+    assert hash_table.capacity == 2
+
+    assert hash_table.pairs == {
+        (1, "one"),
+        (2, "two"),
+    }
