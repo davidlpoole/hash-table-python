@@ -1,5 +1,7 @@
 from typing import NamedTuple, Any
 
+DELETED = object()
+
 
 class Pair(NamedTuple):
     key: Any
@@ -26,20 +28,36 @@ class HashTable:
         cls = self.__class__.__name__
         return f"{cls}.from_dict({str(self)})"
 
-    def __delitem__(self, key):
-        if key in self:
-            self._slots[self._index(key)] = None
-        else:
-            raise KeyError(key)
-
     def __setitem__(self, key, value):
-        self._slots[self._index(key)] = Pair(key, value)
+        for index, pair in self._probe(key):
+            if pair is DELETED: continue
+            if pair is None or pair.key == key:
+                self._slots[index] = Pair(key, value)
+                break
+        else:
+            raise MemoryError("Not enough capacity")
 
     def __getitem__(self, key):
-        pair = self._slots[self._index(key)]
-        if pair is None:
+        for _, pair in self._probe(key):
+            if pair is None:
+                raise KeyError(key)
+            if pair is DELETED:
+                continue
+            if pair.key == key:
+                return pair.value
+        raise KeyError(key)
+
+    def __delitem__(self, key):
+        for index, pair in self._probe(key):
+            if pair is None:
+                raise KeyError(key)
+            if pair is DELETED:
+                continue
+            if pair.key == key:
+                self._slots[index] = DELETED
+                break
+        else:
             raise KeyError(key)
-        return pair.value
 
     def __contains__(self, key):
         try:
@@ -59,6 +77,12 @@ class HashTable:
     def __iter__(self):
         yield from self.keys
 
+    def _probe(self, key):
+        index = self._index(key)
+        for _ in range(self.capacity):
+            yield index, self._slots[index]
+            index = (index + 1) % self.capacity
+
     def get(self, key, default=None):
         try:
             return self[key]
@@ -77,7 +101,10 @@ class HashTable:
 
     @property
     def pairs(self):
-        return {pair for pair in self._slots if pair}
+        return {
+            pair for pair in self._slots
+            if pair not in (None, DELETED)
+        }
 
     @property
     def values(self):
