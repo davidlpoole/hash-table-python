@@ -10,10 +10,13 @@ class Pair(NamedTuple):
 
 class HashTable:
 
-    def __init__(self, capacity: int = 8):
+    def __init__(self, capacity: int = 8, load_factor_threshold=0.6):
         if type(capacity) != int or capacity < 1:
             raise ValueError("Capacity must be a positive integer")
+        if not (0 < load_factor_threshold <= 1):
+            raise ValueError("Load factor must be an integer between (0,1]")
         self._slots = capacity * [None]
+        self._load_factor_threshold = load_factor_threshold
 
     def __len__(self):
         return len(self.pairs)
@@ -29,6 +32,8 @@ class HashTable:
         return f"{cls}.from_dict({str(self)})"
 
     def __setitem__(self, key, value):
+        if self.load_factor >= self._load_factor_threshold:
+            self._resize_and_rehash()
         for index, pair in self._probe(key):
             if pair is DELETED: continue
             if pair is None or pair.key == key:

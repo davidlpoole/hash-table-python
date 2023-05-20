@@ -221,7 +221,7 @@ def test_should_create_hashtable_from_dict():
 
     hash_table = HashTable.from_dict(dictionary)
 
-    assert hash_table.capacity == len(dictionary)
+    assert hash_table.capacity == 6  # with load_factor 0.6
     assert hash_table.keys == set(dictionary.keys())
     assert hash_table.pairs == set(dictionary.items())
     assert unordered(hash_table.values) == list(dictionary.values())
@@ -333,3 +333,18 @@ def test_should_return_correct_load_factor(hash_table):
     assert hash_table.load_factor == 0.03
     hash_table[4] = "test"
     assert hash_table.load_factor == 0.04
+
+
+def test_should_increase_capacity_at_load_factor_threshold():
+    hash_table = HashTable(capacity=10)
+    assert hash_table._load_factor_threshold == 0.6
+    assert hash_table.capacity == 10
+
+    for i in range(1, 7):  # add 6 pairs
+        hash_table[i] = i
+    assert hash_table.capacity == 10
+    assert len(hash_table) == 6
+
+    hash_table["test"] = "test"  # 7th pair triggers resize
+    assert hash_table.capacity == 20
+    assert len(hash_table) == 7
