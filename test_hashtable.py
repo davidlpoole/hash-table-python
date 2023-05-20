@@ -28,15 +28,15 @@ def test_should_report_length(hash_table):
 
 
 def test_should_return_pairs(hash_table):
-    assert hash_table.pairs == {
+    assert hash_table.pairs == [
         ("hola", "hello"),
         (98.6, 37),
         (False, True)
-    }
+    ]
 
 
 def test_should_get_pairs_of_empty_hash_table():
-    assert HashTable(capacity=100).pairs == set()
+    assert HashTable(capacity=100).pairs == []
 
 
 def test_should_return_copy_of_pairs(hash_table):
@@ -167,11 +167,11 @@ def test_should_get_value_with_default(hash_table):
 
 
 def test_should_get_keys(hash_table):
-    assert hash_table.keys == {"hola", 98.6, False}
+    assert hash_table.keys == ["hola", 98.6, False]
 
 
 def test_should_get_keys_of_empty_hash_table():
-    assert HashTable(capacity=100).keys == set()
+    assert HashTable(capacity=100).keys == []
 
 
 def test_should_return_copy_of_keys(hash_table):
@@ -180,8 +180,8 @@ def test_should_return_copy_of_keys(hash_table):
 
 def test_should_convert_to_dict(hash_table):
     dictionary = dict(hash_table.pairs)
-    assert set(dictionary.keys()) == hash_table.keys
-    assert set(dictionary.items()) == hash_table.pairs
+    assert list(dictionary.keys()) == hash_table.keys
+    assert list(dictionary.items()) == hash_table.pairs
     assert list(dictionary.values()) == unordered(hash_table.values)
 
 
@@ -223,8 +223,8 @@ def test_should_create_hashtable_from_dict():
     hash_table = HashTable.from_dict(dictionary)
 
     assert hash_table.capacity == 6  # with load_factor 0.6
-    assert hash_table.keys == set(dictionary.keys())
-    assert hash_table.pairs == set(dictionary.items())
+    assert hash_table.keys == list(dictionary.keys())
+    assert hash_table.pairs == list(dictionary.items())
     assert unordered(hash_table.values) == list(dictionary.values())
 
 
@@ -234,8 +234,8 @@ def test_should_create_hashtable_from_dict_with_custom_capacity():
     hash_table = HashTable.from_dict(dictionary, capacity=100)
 
     assert hash_table.capacity == 100
-    assert hash_table.keys == set(dictionary.keys())
-    assert hash_table.pairs == set(dictionary.items())
+    assert hash_table.keys == list(dictionary.keys())
+    assert hash_table.pairs == list(dictionary.items())
     assert unordered(hash_table.values) == list(dictionary.values())
 
 
@@ -293,14 +293,16 @@ def test_should_compare_equal_different_capacity():
 def test_collided_keys_should_share_bucket():
     with patch("builtins.hash", return_value=5):
         hash_table = HashTable(capacity=10)
+        assert hash_table.capacity == 10
         hash_table["test1"] = "123"
-        hash_table["test2"] = "456"
-        assert hash_table._buckets[5] == deque([
-            Pair(key='test1', value='123'),
-            Pair(key='test2', value='456')
-        ])
-    assert len(hash_table) == 2
-    assert hash_table.capacity == 10
+        hash_table["test2"] = "246"
+        assert hash_table._buckets[5] == \
+               deque([
+                   Pair(key='test1', value='123'),
+                   Pair(key='test2', value='246')
+               ])
+        assert len(hash_table) == 2
+        assert hash_table.capacity == 10
 
 
 def test_should_delete_pair():
@@ -320,10 +322,10 @@ def test_should_increase_capacity():
     hash_table[2] = "two"
     assert hash_table.capacity == 2
 
-    assert hash_table.pairs == {
+    assert hash_table.pairs == [
         (1, "one"),
         (2, "two"),
-    }
+    ]
 
 
 def test_should_return_correct_load_factor(hash_table):

@@ -15,6 +15,7 @@ class HashTable:
         if not (0 < load_factor_threshold <= 1):
             raise ValueError("Load factor must be an integer between (0,1]")
         self._buckets = [deque() for _ in range(capacity)]
+        self._keys = []
         self._load_factor_threshold = load_factor_threshold
 
     def __len__(self):
@@ -35,6 +36,7 @@ class HashTable:
         for index, pair in enumerate(bucket):
             if pair.key == key:
                 del bucket[index]
+                self._keys.remove(key)
                 break
         else:
             raise KeyError(key)
@@ -50,6 +52,7 @@ class HashTable:
                 break
         else:
             bucket.append(Pair(key, value))
+            self._keys.append(key)
 
     def __getitem__(self, key):
         bucket = self._buckets[self._index(key)]
@@ -100,15 +103,15 @@ class HashTable:
 
     @property
     def pairs(self):
-        return {pair for bucket in self._buckets for pair in bucket}
+        return [(key, self[key]) for key in self.keys]
 
     @property
     def values(self):
-        return [pair.value for pair in self.pairs]
+        return [self[key] for key in self.keys]
 
     @property
     def keys(self):
-        return {pair.key for pair in self.pairs}
+        return self._keys.copy()
 
     @property
     def capacity(self):
