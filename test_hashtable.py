@@ -2,7 +2,8 @@ import pytest
 from pytest_unordered import unordered
 from unittest.mock import patch
 
-from hashtable import HashTable, DELETED
+from hashtable import HashTable, Pair
+from collections import deque
 
 
 @pytest.fixture
@@ -46,8 +47,8 @@ def test_should_not_include_blank_pairs(hash_table):
     assert None not in hash_table.pairs
 
 
-def test_should_create_empty_pair_slots():
-    assert HashTable(capacity=3)._slots == [None, None, None]
+def test_should_create_empty_pair_buckets():
+    assert HashTable(capacity=3)._buckets == [deque(), deque(), deque()]
 
 
 def test_should_insert_key_value_pairs(hash_table):
@@ -289,29 +290,25 @@ def test_should_compare_equal_different_capacity():
     assert h1 == h2
 
 
-def test_should_store_collided_key_value_pair_in_next_slot():
-    with patch("builtins.hash", return_value=24):
-        values = {
-            "easy": "Requires little effort",
-            "difficult": "Needs much skill"
-        }
-        hash_table = HashTable.from_dict(values, capacity=100)
-
-    assert hash_table._slots[24].key == "easy"
-    assert hash_table._slots[24].value == "Requires little effort"
-    assert hash_table._slots[25].key == "difficult"
-    assert hash_table._slots[25].value == "Needs much skill"
-    assert hash_table.capacity == 100
+def test_collided_keys_should_share_bucket():
+    with patch("builtins.hash", return_value=5):
+        hash_table = HashTable(capacity=10)
+        hash_table["test1"] = "123"
+        hash_table["test2"] = "456"
+        assert hash_table._buckets[5] == deque([
+            Pair(key='test1', value='123'),
+            Pair(key='test2', value='456')
+        ])
     assert len(hash_table) == 2
+    assert hash_table.capacity == 10
 
 
-def test_should_change_to_DELETED():
-    with patch("builtins.hash", return_value=24):
-        hash_table = HashTable(capacity=100)
-        hash_table["test"] = "123"
-        assert hash_table._slots[24].key == "test"
-        del hash_table["test"]
-        assert hash_table._slots[24] is DELETED
+def test_should_delete_pair():
+    hash_table = HashTable(capacity=10)
+    hash_table["test1"] = "123"
+    assert len(hash_table) == 1
+    del hash_table["test1"]
+    assert len(hash_table) == 0
 
 
 def test_should_increase_capacity():
